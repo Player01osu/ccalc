@@ -1778,7 +1778,7 @@ int main(void)
 	//parser_test();
 	//parser_repl();
 
-	eval_test();
+	//eval_test();
 	repl();
 	return 0;
 }
