@@ -11,7 +11,7 @@
 #include "arena.h"
 
 /* Memory is cheap */
-#define ARENA_SIZE 1024 * 16
+#define ARENA_SIZE 1024 * 64
 #define READ_BUF_SIZE 1024
 #define TOKEN_VEC_SIZE 2
 #define INPUT_BUF_SIZE 1024 / 2
@@ -1728,6 +1728,7 @@ void repl(void)
 		sym_value_print(&env, eval_str(&env, arena, input_buf));
 	}
 
+	printf("%lu\n", arena->index);
 	env_destroy(&env);
 	arena_destroy(arena);
 }
