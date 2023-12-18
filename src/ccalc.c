@@ -596,6 +596,8 @@ Expr *parse_num(Parser *parser, Token *token);
 
 Expr *parse_ident(Parser *parser, Token *token);
 
+Expr *parse_negative(Parser *parser);
+
 Expr *parse_paren(Parser *parser);
 
 Exprs parse_args(Parser *parser);
@@ -604,6 +606,9 @@ Expr *parse_expr(Parser *parser, Token *token)
 {
 	// TODO: Check infix here instead
 	switch (token->kind) {
+	case TOKEN_MINUS: {
+		return parse_negative(parser);
+	} break;
 	case TOKEN_NUM: {
 		return parse_num(parser, token);
 	} break;
@@ -619,6 +624,43 @@ Expr *parse_expr(Parser *parser, Token *token)
 	}
 	}
 }
+
+// MINUS (IDENT|NUM) ...
+//       ^           ^
+//       start       end
+Expr *parse_negative(Parser *parser)
+{
+	Token token = parser_bump(parser);
+	switch (token.kind) {
+		case TOKEN_NUM: {
+			token.data.num *= -1;
+			return parse_num(parser, &token);
+		} break;
+		case TOKEN_IDENT: {
+			Expr *infix = arena_alloc(parser->arena, sizeof(Expr));
+			Expr *expr_a = arena_alloc(parser->arena, sizeof(Expr));
+			Expr *expr_b = arena_alloc(parser->arena, sizeof(Expr));
+			expr_a->kind = EXPR_NUM;
+			expr_a->data.num = -1.0f;
+
+			expr_b->kind = EXPR_IDENT;
+			expr_b->data.ident.token_string = token.data.string;
+
+			infix->kind = EXPR_INFIX;
+			infix->data.infix = (Infix) {
+				.expr_a = expr_a,
+				.expr_b = expr_b,
+				.operator = OPERATOR_MULT,
+			};
+
+			return infix;
+		} break;
+		default: {
+			parser_error(parser, "Unexpected token");
+		} break;
+	}
+}
+
 
 // EXPR OPERATOR EXPR ...
 //      ^             ^
@@ -890,6 +932,10 @@ Node parser_next(Parser *parser)
 	Node node = { 0 };
 
 	switch (token.kind) {
+	case TOKEN_MINUS: {
+		node.kind = NODE_EXPR;
+		node.data.expr = parse_negative(parser);
+	} break;
 	case TOKEN_NUM: {
 		node.kind = NODE_EXPR;
 		node.data.expr = parse_num(parser, &token);
