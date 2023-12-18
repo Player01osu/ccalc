@@ -7,12 +7,11 @@ Calculator
 
 #### Working
 
-- Basic calculator
+- Simple arithmetic
 - Defining variables
 
 #### On The Way
 
-- Simple arithmetic
 - Derivatives
 - Defining functions
 - Built-in functions and constants
